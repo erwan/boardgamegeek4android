@@ -3,6 +3,7 @@ package com.boardgamegeek.ui;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.Snackbar;
@@ -21,6 +22,7 @@ import com.boardgamegeek.auth.Authenticator;
 import com.boardgamegeek.events.GameInfoChangedEvent;
 import com.boardgamegeek.events.UpdateCompleteEvent;
 import com.boardgamegeek.events.UpdateEvent;
+import com.boardgamegeek.provider.BggContract;
 import com.boardgamegeek.provider.BggContract.Games;
 import com.boardgamegeek.service.UpdateService;
 import com.boardgamegeek.util.ActivityUtils;
@@ -54,7 +56,8 @@ public class GameActivity extends HeroActivity implements Callback {
 			supportActionBar.setDisplayHomeAsUpEnabled(true);
 		}
 
-		gameId = Games.getGameId(getIntent().getData());
+		final Uri gameUri = BggContract.Games.normalizeGameUri(getIntent().getData());
+		gameId = Games.getGameId(gameUri);
 		changeName(getIntent().getStringExtra(ActivityUtils.KEY_GAME_NAME));
 
 		new Handler().post(new Runnable() {
@@ -62,7 +65,7 @@ public class GameActivity extends HeroActivity implements Callback {
 			public void run() {
 				ContentValues values = new ContentValues();
 				values.put(Games.LAST_VIEWED, System.currentTimeMillis());
-				getContentResolver().update(getIntent().getData(), values, null, null);
+				getContentResolver().update(gameUri, values, null, null);
 			}
 		});
 		if (PreferencesUtils.showLogPlay(this)) {

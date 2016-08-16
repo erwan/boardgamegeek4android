@@ -231,9 +231,11 @@ public class BggContract {
 
 	public static final String COLLATE_NOCASE = " COLLATE NOCASE";
 	public static final String CONTENT_AUTHORITY = "com.boardgamegeek";
+	public static final String BGG_DOMAIN = "boardgamegeek.com";
 	private static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
 	public static final String PATH_GAMES = "games";
+	public static final String PATH_BOARDGAME = "boardgame";
 	private static final String PATH_RANKS = "ranks";
 	public static final String PATH_DESIGNERS = "designers";
 	public static final String PATH_ARTISTS = "artists";
@@ -304,6 +306,16 @@ public class BggContract {
 
 		public static Uri buildGameUri(int gameId) {
 			return getUriBuilder(gameId).build();
+		}
+
+		public static Uri normalizeGameUri(Uri uri) {
+			if (BGG_DOMAIN.equals(uri.getHost())) {
+				List<String> segments = uri.getPathSegments();
+				if (segments != null && segments.size() > 0 && PATH_BOARDGAME.equals(segments.get(0))) {
+					return buildGameUri(StringUtils.parseInt(segments.get(1)));
+				}
+			}
+			return uri;
 		}
 
 		public static Uri buildThumbnailUri(int gameId) {
